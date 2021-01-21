@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 from django.db import migrations
 from django.db.models import Q
 
+from sentry.utils.query import RangeQuerySetWrapperWithProgressBar
+
 
 def remove_slack_workspace_apps(apps, schema_editor):
     """
@@ -27,7 +29,9 @@ def remove_slack_workspace_apps(apps, schema_editor):
         .values_list("id", flat=True)
     )
 
-    for org_integration in OrganizationIntegration.objects.filter(integration_id__in=integrations):
+    for org_integration in RangeQuerySetWrapperWithProgressBar(
+        OrganizationIntegration.objects.filter(integration_id__in=integrations)
+    ):
         org_integration.delete()
 
 
